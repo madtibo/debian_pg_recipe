@@ -35,7 +35,13 @@ Il est possible de configurer les logs pour mieux suivre le fonctionnement de l'
  * `log_temp_files = 0` : tracer toutes les requêtes qui ont généré des fichiers temporaires, quelle que soit la taille du fichier ;
  * `log_min_duration_statement = 5000` : tracer les requêtes dont le temps d'exécution dépasse la durée indiquée (en millisecondes). Il peut être intéressant de tracer les requêtes longues en production afin de les remonter aux développeurs pour optimisation ou pour tenter de déterminer la cause et le moment d'un ralentissement global du système ;
  * `log_autovacuum_min_duration = 0` : tracer toutes les actions déclenchées par l'autovacuum.
-
+ * `log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d '` : indique le contenu du préfixe de chaque ligne de trace, à savoir timestamp [PID de la session]: [numéro de ligne de la session-1] user=<nom de l'utilisateur>,db=<base de données connectée>
+ * `lc_messages = 'C'` : permet d'avoir les messages dans les trace en anglais.
+ * `log_directory = /var/log/postgresql` : écrire les logs dans un répertoire dédié, non relatif au PGDATA ;
+ * `log_filename = postgresql-<version>-<instance>.log` : écrire dans un fichier portant un nom ne contenant pas de variables afin de pouvoir utiliser logrotate (on peut également inclure le nom de l'application ou de l'instance dans le nom du fichier si besoin) ;
+ * `log_rotation_age = 0` : désactiver la rotation de PostgreSQL liée à l'âge du fichier ;
+ * `log_rotation_size = 0` : désactiver la rotation de PostgreSQL liée à la taille du fichier ;
+ * `log_truncate_on_rotation = off` : désactiver l'écrasement du fichier à la rotation.
 
 
 ## Exploitation de PostgreSQL
@@ -53,11 +59,23 @@ La commande `systemctl` est utilisée pour agir sur l'instance:
 
 Pour notre instance, la commande de rechargement de la configuration est :
 ```
-# systemctl reload postgresql@9.3-main.service
+# systemctl reload postgresql@9.6-main.service
 ```
 
 Les journaux applicatifs (logs) sont écrits dans le fichier /var/log/postgresql/postgresql-<version>-<instance>.log.
-Ces log sont archivés automatiquement toutes les semaines et supprimés au bout de 10 semaines. Cette configuration doit-être revue si les niveaux de logs de l'application sont remontés (fichier `/etc/logrotate.d/postgresql-common`).
-
-
-
+Ces log sont archivés automatiquement toutes les semaines et supprimés au bout de 10 semaines. Cette configuration doit-être revue si les niveaux de logs de l'application sont remontés (fichier `/etc/logrotate.d/postgresql-common`) :
+```
+/var/log/postgresql/postgresql-*.log {
+  daily
+  rotate 10
+  copytruncate
+  delaycompress
+  compress
+  notifempty
+  missingok
+  create 0660 postgres postgres
+  postrotate
+    su -l postgres -c 'psql -c "select pg_rotate_logfile()" -o /dev/null'
+  endscript
+}
+```

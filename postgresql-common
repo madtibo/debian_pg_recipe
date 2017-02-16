@@ -1,0 +1,13 @@
+/var/log/postgresql/postgresql-*.log {
+  daily
+  rotate 10
+  copytruncate
+  delaycompress
+  compress
+  notifempty
+  missingok
+  create 0660 postgres postgres
+  postrotate
+    su -l postgres -c 'psql -c "select pg_rotate_logfile()" -o /dev/null'
+  endscript
+}

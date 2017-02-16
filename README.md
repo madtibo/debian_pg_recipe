@@ -24,8 +24,8 @@ Les fichiers de configurations pour l'instance par défaut sont situés dans `/e
 
 Fichier de configuration _postgresql.conf_ :
 ```
-shared_buffers = 256MB   # 1/4 de la mémoire totale, maximum 4GB
-effective_cache_size = 512MB   # 1/2 de la mémoire totale pour un serveur dédié à la BdD
+shared_buffers = 128MB   # 1/4 de la mémoire totale, maximum 4GB
+effective_cache_size = 512MB   # 1/2 à 2/3 de la mémoire totale pour un serveur dédié à la BdD
 listen_addresses = '*'
 ```
 
@@ -37,7 +37,7 @@ Il est possible de configurer les logs pour mieux suivre le fonctionnement de l'
  * `log_autovacuum_min_duration = 0` : tracer toutes les actions déclenchées par l'autovacuum.
  * `log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d '` : indique le contenu du préfixe de chaque ligne de trace, à savoir timestamp [PID de la session]: [numéro de ligne de la session-1] user=<nom de l'utilisateur>,db=<base de données connectée>
  * `lc_messages = 'C'` : permet d'avoir les messages dans les trace en anglais.
- * `log_directory = /var/log/postgresql` : écrire les logs dans un répertoire dédié, non relatif au PGDATA ;
+ * `log_directory = '/var/log/postgresql'` : écrire les logs dans un répertoire dédié, non relatif au PGDATA ;
  * `log_filename = postgresql-<version>-<instance>.log` : écrire dans un fichier portant un nom ne contenant pas de variables afin de pouvoir utiliser logrotate (on peut également inclure le nom de l'application ou de l'instance dans le nom du fichier si besoin) ;
  * `log_rotation_age = 0` : désactiver la rotation de PostgreSQL liée à l'âge du fichier ;
  * `log_rotation_size = 0` : désactiver la rotation de PostgreSQL liée à la taille du fichier ;
